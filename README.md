@@ -2,12 +2,14 @@
 
 Fast Context 的 Skill + CLI 形态：面向 Claude / agent 工作流的 AI 驱动语义代码搜索工具。
 
+已发布到 npm：[`fast-context-skill`](https://www.npmjs.com/package/fast-context-skill)。两个 bin 等价：`fast-context-skill`、`fast-cxt-skill`。
+
 本项目复用 [`fast-context-mcp`](https://github.com/awei84/fast-context-mcp) 的 Node.js 核心代码，只新增一层 CLI 和 `SKILL.md`。它不是 Python 重写版，也不会引入本地语义搜索兜底。
 
 ## 什么时候用
 
-- 需要给 Claude Desktop、Claude Code、Cursor 或其他 MCP 客户端接入 MCP server 时，用 `fast-context-mcp`。
-- 需要一个 Skill 友好的 CLI，让 agent 通过 `npx` 调用时，用 `fast-context-skill`。
+- 需要给 Claude Desktop、Cursor 或其他 MCP 客户端接入 MCP server 时，用 [`fast-context-mcp`](https://github.com/awei84/fast-context-mcp)。
+- 需要一个 Skill 友好的 CLI，让 Claude / agent 通过 `npx` 调用时，用本项目 `fast-context-skill`。
 
 两种形态复用同一套 Windsurf SWE-grep 协议和内置本地工具。
 
@@ -18,9 +20,9 @@ Fast Context 的 Skill + CLI 形态：面向 Claude / agent 工作流的 AI 驱�
 
 不需要系统安装 `rg` 或 `tree`。`ripgrep` 通过 `@vscode/ripgrep` 内置，目录树输出使用 `tree-node-cli`。
 
-## 使用方式
+## 快速开始
 
-运行语义代码搜索：
+无需全局安装，`npx` 会自动拉取最新版：
 
 ```bash
 npx -y fast-context-skill search \
@@ -28,12 +30,20 @@ npx -y fast-context-skill search \
   --project /absolute/path/to/project
 ```
 
-也兼容同类 Skill 的顶层参数形式：
+也兼容同类 Skill 的顶层参数形式（省略 `search` 子命令）：
 
 ```bash
 npx -y fast-context-skill \
   --query "where is authentication handled" \
   --project /absolute/path/to/project
+```
+
+> 提示：query 优先用英文。底层模型的代码语料以英文为主，英文 query 与代码同语种，语义召回更准。
+
+从本机 Windsurf 安装中提取 API Key：
+
+```bash
+npx -y fast-context-skill extract-key
 ```
 
 本仓库本地开发时：
@@ -44,10 +54,42 @@ node src/cli.mjs search \
   --project /absolute/path/to/project
 ```
 
-从本机 Windsurf 安装中提取 API Key：
+## 安装为 Claude Skill
+
+把 `SKILL.md` 放到 Claude 的 skills 目录即可（命令通过 `npx` 拉取 CLI，无需把整个包放进去）：
 
 ```bash
-npx -y fast-context-skill extract-key
+mkdir -p ~/.claude/skills/fast-context-skill
+npm pack fast-context-skill            # 下载发布包 tarball
+tar -xzf fast-context-skill-*.tgz
+cp package/SKILL.md ~/.claude/skills/fast-context-skill/SKILL.md
+rm -rf package fast-context-skill-*.tgz
+```
+
+之后在 Claude Code 里可用 `/fast-context-skill` 调用，或让 Claude 在需要定位代码时自动触发。
+
+## 设置 API Key
+
+CLI 优先读取环境变量 `WINDSURF_API_KEY`，未设置时再从本机 Windsurf 数据库自动提取。显式设置后即使卸载 Windsurf 也能继续用。
+
+**重要：Windsurf 当前的 key 形如 `devin-session-token$<JWT>`，其中含 `$`。写进 shell 配置时必须用单引号，否则 `$<JWT>` 会被 shell 当变量展开导致 key 截断、认证返回 401。**
+
+```bash
+# 写入 ~/.zshrc（bash 用户写 ~/.bashrc）——注意是单引号
+echo "export WINDSURF_API_KEY='$(npx -y fast-context-skill --print-key)'" >> ~/.zshrc
+source ~/.zshrc
+```
+
+或手动粘贴（同样必须单引号）：
+
+```bash
+export WINDSURF_API_KEY='devin-session-token$eyJhbGci...'
+```
+
+`--key-env` 会输出已正确加好单引号的 export 命令：
+
+```bash
+eval "$(npx -y fast-context-skill --key-env)"
 ```
 
 ## CLI
@@ -166,7 +208,7 @@ node src/cli.mjs --help
 
 ## 不做什么
 
-- 不做本地 `semble` 兜底。
+- 不做本地 `semble` 兜底（会破坏纯 Node、零系统依赖、`npx` 一键的定位）。
 - 不走 Python 依赖路线。
 - 不替代 MCP 包；本项目只提供独立的 CLI + Skill 形态。
-- 不把多模型 fallback 作为首版目标；当前保留 `WS_MODEL` 单模型配置和现有请求重试。
+- 不做多模型 fallback / 重试退避：交互式工具失败时人会重看，限流时自动重试反添乱，且本项目认定主模型 `WS_MODEL` 最优，切备用 = 主动降级。保留单模型配置和已有 HTTP 重试即可。
