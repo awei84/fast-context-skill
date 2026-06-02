@@ -12,13 +12,17 @@ allowed-tools: Bash
 
 ## 何时使用
 
-当需要探索代码库上下文、定位功能实现、理解跨模块调用链，或先用自然语言缩小候选文件时使用本技能。
+当不知道代码在哪、只知道业务含义时，使用本技能探索代码库上下文、定位功能实现、理解跨模块调用链，或先用自然语言缩小候选文件。
 
-已知明确函数名、类名、变量名、路由、报错文本时，先用 `rg` 精确搜索；如果结果不足以理解上下文，再使用 Fast Context。
+已知明确函数名、类名、变量名、路由、文件名、报错原文或其他可精确匹配的字符串时，先用 `rg` 精确搜索；如果结果不足以理解上下文，再使用 Fast Context。
 
 ## 工作流
 
-1. 使用 CLI 运行语义搜索。**优先用英文写 query**：底层模型的代码语料以英文为主，英文 query 与代码同语种，语义召回更准。中文也能用，但建议把关键名词换成英文（"用户登录鉴权" → "user login authentication"）。
+1. 先判断问题类型：
+   - 明确字符串/符号/路由/报错/文件名 → 用 `rg`，再读文件核验。
+   - 不确定位置/业务语义问题 → 用 Fast Context，读候选文件核验，必要时再用 `rg` 拉引用。
+
+2. 对业务语义问题，使用 CLI 运行语义搜索。**优先用英文写 query**：底层模型的代码语料以英文为主，英文 query 与代码同语种，语义召回更准。中文也能用，但建议把关键名词换成英文（"用户登录鉴权" → "user login authentication"）。
 
 ```bash
 npx -y fast-context-skill search --query "where is auth handled" --project /absolute/path/to/project
@@ -30,9 +34,9 @@ npx -y fast-context-skill search --query "where is auth handled" --project /abso
 npx -y fast-context-skill --query "where is auth handled" --project /absolute/path/to/project
 ```
 
-2. 阅读输出中的文件路径、行号范围、`grep keywords` 和 `[config]`（见下方「输出示例」）。
+3. 阅读输出中的文件路径、行号范围、`grep keywords` 和 `[config]`（见下方「输出示例」）。
 
-3. 必须用 `rg` 或文件读取核验 Fast Context 返回的候选结果，再基于具体 `path:line` 给结论。
+4. 必须用文件读取或 `rg` 核验 Fast Context 返回的候选结果，再基于具体 `path:line` 给结论。
 
 ## 输出示例
 
@@ -48,7 +52,7 @@ grep keywords: authenticate, jwt.*verify, session.*token
 [config] project_path=/project, tree_depth=3, tree_size=12.5KB, max_turns=3, max_results=10, timeout_ms=30000
 ```
 
-把文件 + 行号当作起点，用 `grep keywords` 做二次精确搜索，再读文件核验。失败时输出会带 `Error:` 和 `[hint]`，按提示调小 `--tree-depth`/`--max-turns` 或缩小 `--project`。
+把文件 + 行号当作起点，先读候选文件核验；需要追踪引用或扩大证据面时，再用 `grep keywords` 做精确搜索。失败时输出会带 `Error:` 和 `[hint]`，按提示调小 `--tree-depth`/`--max-turns` 或缩小 `--project`。
 
 ## 推荐参数
 

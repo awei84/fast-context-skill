@@ -1,10 +1,10 @@
 # fast-context-skill
 
-> 本文件会被 Claude 自动加载。开新会话请先读 `localdocs/2026-06-01_项目背景与决策.md` 获取完整背景。
+> 本文件会被 Codex 自动加载。开新会话请先读 `localdocs/2026-06-01_项目背景与决策.md` 获取完整背景。
 
 ## 这是什么项目
 
-`fast-context-mcp`（纯 Node、MCP 形态）的 **Skill + CLI 形态版本**，服务 Claude / agent 生态。
+`fast-context-mcp`（纯 Node、MCP 形态）的 **Skill + CLI 形态版本**，服务 Codex / agent 生态。
 **复用母项目核心代码，不推倒重来。** 用 Node，不用 Python。
 
 - 母项目：`/Users/awei84/开源项目/fast-context-mcp`（继续维护，不弃）
@@ -12,7 +12,7 @@
 
 ## 铁律（务必遵守）
 
-1. ❌ **不做本地 Semble 兜底**。核心理由:fallback 不是免费的鲁棒性,会改变 agent 的证据质量——消费者是 agent,远端失败时它本就能退回 `rg`/读文件自己探索,弱相关兜底的对手是「agent 自己 grep」而非「失败」,且会让 agent 过早锚定、少做核验。我们追求「结果值得 agent 相信和核验」而非「任何情况下都有结果」。其次才是它会破坏「纯 Node、零系统依赖、npx 一键」的核心定位。详见背景文档「决策 1」。
+1. ❌ **不做本地 Semble 兜底**。引入它会破坏「纯 Node、零系统依赖、npx 一键」的核心定位。详见背景文档「决策 1」。
 2. ✅ **CLI 用 Node 复用母项目代码**（`core.mjs / executor.mjs / protobuf.mjs / extract-key.mjs` 等），不重写协议层。
 3. ✅ **Skill 只做薄包装**：SKILL.md 是 markdown，命令走 `npx -y <包名> search ...`。
 4. ❌ **不做多模型 fallback + 重试退避**。交互式工具失败时人会重看，限流时自动重试反添乱，且本项目认定主模型最优，切备用 = 主动降级。逻辑同决策 1，已否决。
