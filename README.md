@@ -1,6 +1,6 @@
 # fast-context-skill
 
-Fast Context 的 Skill + CLI 形态：面向 Claude / agent 工作流的 AI 驱动语义代码搜索工具。
+Fast Context 的 Skill + CLI 形态：面向 Codex / 通用 agent 工作流的 AI 驱动语义代码搜索工具。
 
 已发布到 npm：[`fast-context-skill`](https://www.npmjs.com/package/fast-context-skill)。两个 bin 等价：`fast-context-skill`、`fast-cxt-skill`。
 
@@ -9,7 +9,7 @@ Fast Context 的 Skill + CLI 形态：面向 Claude / agent 工作流的 AI 驱�
 ## 什么时候用
 
 - 需要给 Claude Desktop、Cursor 或其他 MCP 客户端接入 MCP server 时，用 [`fast-context-mcp`](https://github.com/awei84/fast-context-mcp)。
-- 需要一个 Skill 友好的 CLI，让 Claude / agent 通过 `npx` 调用时，用本项目 `fast-context-skill`。
+- 需要一个 Skill 友好的 CLI，让 Codex / agent 通过 `npx` 调用时，用本项目 `fast-context-skill`。
 
 两种形态复用同一套 Windsurf SWE-grep 协议和内置本地工具。
 
@@ -54,9 +54,19 @@ node src/cli.mjs search \
   --project /absolute/path/to/project
 ```
 
-## 安装为 Claude Skill
+## 安装为 Agent Skill
 
-把 `SKILL.md` 放到 Claude 的 skills 目录即可（命令通过 `npx` 拉取 CLI，无需把整个包放进去）：
+把 `SKILL.md` 放到目标 agent 的 skills 目录即可（命令通过 `npx` 拉取 CLI，无需把整个包放进去）。Codex 本地安装示例：
+
+```bash
+mkdir -p ~/.codex/skills/fast-context-skill
+npm pack fast-context-skill            # 下载发布包 tarball
+tar -xzf fast-context-skill-*.tgz
+cp package/SKILL.md ~/.codex/skills/fast-context-skill/SKILL.md
+rm -rf package fast-context-skill-*.tgz
+```
+
+Claude Code 兼容安装示例：
 
 ```bash
 mkdir -p ~/.claude/skills/fast-context-skill
@@ -66,7 +76,7 @@ cp package/SKILL.md ~/.claude/skills/fast-context-skill/SKILL.md
 rm -rf package fast-context-skill-*.tgz
 ```
 
-之后在 Claude Code 里可用 `/fast-context-skill` 调用，或让 Claude 在需要定位代码时自动触发。
+之后重启对应 agent，让它重新加载 skill metadata。
 
 ## 设置 API Key
 

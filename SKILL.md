@@ -1,11 +1,6 @@
 ---
 name: fast-context-skill
-description: AI-driven semantic code search via Windsurf's Devstral SWE-grep protocol. Use to find where logic lives, how a flow works, which files matter for a bug or feature, or to orient in an unfamiliar repo before editing. 用于定位代码、理解业务链路与调用关系。已知精确标识符时先用 rg。
-when_to_use: |
-  Trigger on requests like "where is X implemented/handled", "how does this flow work", "which files relate to <feature/bug>", "理解一下这块逻辑", "这个功能在哪实现". Use when the exact symbol name is not yet known and you need a short list of candidate files before reading or editing. Skip it when the filename/symbol is already known (use rg) or for structural refactors (use ast-grep).
-argument-hint: "[query]"
-user-invocable: true
-allowed-tools: Bash
+description: AI-driven semantic code search via Windsurf's Devstral SWE-grep protocol for Codex and general coding agents. Use when the exact code location is unknown and the task is about business logic, feature flows, handlers, or cross-module behavior. Skip when there is a known keyword, route, filename, function/class name, or exact error text; use rg first in those cases.
 ---
 
 # Fast Context

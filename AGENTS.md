@@ -24,7 +24,7 @@
 已落地：
 - `src/cli.mjs`：`search` / `extract-key` / key 快捷命令（`--check-key` / `--print-key` / `--key-env` / `--db-path`），支持顶层 `--query` 调用、`--json`、`--progress`、`--include-code-snippets`、`--exclude`
 - 复用母项目 6 个核心模块（core / executor / protobuf / directory-scorer / extract-key / project-path）
-- `SKILL.md`（已按 Anthropic 官方规范精修：唯一 name、when_to_use、英文 query 引导、输出示例）
+- `SKILL.md`（通用 agent/Codex 取向：简洁 frontmatter、英文 query 引导、输出示例）
 - `references/script-contract.md`、`NOTICE.md`、README、LICENSE、38 个测试全绿
 
 已修复的真 bug：`--progress` 空转、`--db-path` 被丢弃、mock 掩盖集成 bug（已补不打 mock 的透传测试）。
