@@ -20,6 +20,8 @@ npx -y fast-context-skill \
 
 CLI 会调用 `searchWithContent()`，通过 Windsurf Devstral 做远程语义搜索，并在本地执行受限的 `rg`、文件读取和目录树命令。
 
+大仓库或混合仓库不要默认扫整个 repo。优先把 `--project` 缩到最可能的源码子目录，例如 `backend`、`server`、`src`、`app`、`services`、`packages/<name>`，并配合 `--exclude node_modules,dist,build,coverage,vendor,generated,ent,out,target`。
+
 ## 常用参数
 
 - `--query`, `-q`：自然语言搜索问题。
@@ -66,5 +68,6 @@ CLI 会调用 `searchWithContent()`，通过 Windsurf Devstral 做远程语义�
 - 依赖缺失：在包目录运行 `npm install`。
 - 结果太浅：提高 `--max-turns` 或 `--max-results`，或换成更具体的问题。
 - 仓库太大：降低 `--tree-depth`，增加 `--exclude`，或把 `--project` 缩小到子目录。
+- 空结果但 raw response 被截断：优先按大仓库处理，缩小 `--project` 到源码子目录并增加 `--exclude` 后重跑；不要直接认定没有相关代码。
 - 认证失败：先运行 `--check-key`，确认 Windsurf 已登录，或设置 `WINDSURF_API_KEY`。
 - 不要引入本地语义搜索 fallback；失败时暴露真实错误和调参建议。

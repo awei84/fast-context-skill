@@ -40,6 +40,8 @@ npx -y fast-context-skill \
 
 > 提示：query 优先用英文。底层模型的代码语料以英文为主，英文 query 与代码同语种，语义召回更准。
 
+> 大仓库提示：如果仓库包含前后端、文档、生成代码或 vendor 目录，优先把 `--project` 缩到最可能的源码子目录，例如 `backend`、`server`、`src`、`app`、`services`、`packages/<name>`，并排除 `node_modules,dist,build,coverage,vendor,generated,ent,out,target`。
+
 从本机 Windsurf 安装中提取 API Key：
 
 ```bash
@@ -162,8 +164,10 @@ npx -y fast-context-skill search --query "..." --project /absolute/path/to/proje
 
 1. 明确字符串/符号/报错时，先用 `rg`，再读文件核验。
 2. 不确定代码位置、只知道业务含义时，用 Fast Context 找候选文件和 grep keywords。
-3. 读候选文件核验；必要时再用 `rg` 拉引用或做精确确认。
-4. 基于具体 `path:line` 证据回答。
+3. 大仓库先把 `--project` 缩到 `backend`、`server`、`src`、`app`、`services`、`packages/<name>` 这类源码子目录，并用 `--exclude` 排除生成代码、构建产物和 vendor。
+4. 读候选文件核验；必要时再用 `rg` 拉引用或做精确确认。
+5. 如果看到 `No relevant files found` 且 raw response 被截断，先缩小 `--project` 并增加 `--exclude` 后重跑，不要直接认定没有相关代码。
+6. 基于具体 `path:line` 证据回答。
 
 ## 环境变量
 

@@ -2059,6 +2059,27 @@ function _readCodeSnippets(filePath, ranges, budget) {
   return { snippets, used };
 }
 
+export function formatEmptySearchResult(rawResponse = "") {
+  if (!rawResponse) {
+    return [
+      "No relevant files found.",
+      "",
+      "[hint] If this was a large or mixed repository, narrow --project to the most likely source subtree such as backend, server, src, app, services, or packages/<name>, and add excludes for generated/vendor output.",
+    ].join("\n");
+  }
+
+  const MAX_RAW = 500;
+  const wasTruncated = rawResponse.length > MAX_RAW;
+  const raw = wasTruncated
+    ? rawResponse.slice(0, MAX_RAW) + "\n...[raw_response truncated]..."
+    : rawResponse;
+  const hint = wasTruncated
+    ? "[hint] Raw response was truncated before files could be parsed. Narrow --project to a source subtree and add excludes such as node_modules,dist,build,coverage,vendor,generated,ent."
+    : "[hint] If this was a large or mixed repository, narrow --project to a source subtree and add excludes such as node_modules,dist,build,coverage,vendor,generated,ent.";
+
+  return `No relevant files found.\n\nRaw response:\n${raw}\n\n${hint}`;
+}
+
 /**
  * Search and return formatted result suitable for MCP tool response.
  *
@@ -2169,11 +2190,7 @@ export async function searchWithContent({
   }
 
   if (!files.length && !uniquePatterns.length) {
-    const raw = result.raw_response || "";
-    if (!raw) return "No relevant files found.";
-    const MAX_RAW = 500;
-    const truncated = raw.length > MAX_RAW ? raw.slice(0, MAX_RAW) + "\n...[raw_response truncated]..." : raw;
-    return `No relevant files found.\n\nRaw response:\n${truncated}`;
+    return formatEmptySearchResult(result.raw_response || "");
   }
 
   const parts = [];

@@ -23,6 +23,9 @@ description: AI-driven semantic code search via Windsurf's Devstral SWE-grep pro
 npx -y fast-context-skill search --query "where is auth handled" --project /absolute/path/to/project
 ```
 
+   - 大仓库或前后端/文档/生成代码混在一起时，先把 `--project` 缩到最可能的源码子目录，例如 `backend`、`server`、`src`、`app`、`services`、`packages/<name>`，不要默认扫整个 monorepo。
+   - 常见噪声目录要显式排除：`node_modules,dist,build,coverage,vendor,generated,ent,out,target`。这些目录过多时可能导致 raw response 被截断，看起来像 `No relevant files found`。
+
 兼容形式：
 
 ```bash
@@ -49,6 +52,8 @@ grep keywords: authenticate, jwt.*verify, session.*token
 
 把文件 + 行号当作起点，先读候选文件核验；需要追踪引用或扩大证据面时，再用 `grep keywords` 做精确搜索。失败时输出会带 `Error:` 和 `[hint]`，按提示调小 `--tree-depth`/`--max-turns` 或缩小 `--project`。
 
+如果看到 `No relevant files found` 且包含 `[raw_response truncated]`，不要直接认定没有相关代码。先把 `--project` 改成更小的源码子目录，并增加 `--exclude` 后重跑；仍然为空时，再回到 `rg`、目录遍历和文件读取核验。
+
 ## 推荐参数
 
 query 尽量用英文短句描述要找的功能或代码路径。默认轻量模式：
@@ -68,11 +73,11 @@ npx -y fast-context-skill search \
 ```bash
 npx -y fast-context-skill search \
   --query "where is the user login session validated" \
-  --project /absolute/path/to/project \
+  --project /absolute/path/to/project/backend \
   --max-results 8 \
   --max-turns 2 \
   --tree-depth 1 \
-  --exclude node_modules,dist,build,coverage,vendor
+  --exclude node_modules,dist,build,coverage,vendor,generated,ent,out,target
 ```
 
 需要一次性获取代码片段：
